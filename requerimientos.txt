@@ -1,0 +1,27 @@
+Clonar el repositorio
+
+1.Primero, debes clonar el repositorio de GitHub. Abre una terminal y ejecuta el siguiente comando:
+
+git clone https://github.com/Dirolita/gusanito-tk.git
+
+2. Luego, navega al directorio del proyecto:
+
+cd gusanito-tk
+
+3. Es recomendable usar un entorno virtual para manejar las dependencias de manera aislada. Para crear y activar un entorno virtual, sigue estos pasos:
+
+En Windows: 
+python -m venv venv
+venv\Scripts\activate
+
+En macOS/Linux:
+python3 -m venv venv
+source venv/bin/activate
+
+4-Con el entorno virtual activado, instala las dependencias utilizada
+
+pip install Pillow==8.3.1
+
+5.Una vez instaladas las dependencias, ejecuta el archivo del juego:
+
+python main.py

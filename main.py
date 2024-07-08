@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import simpledialog, messagebox
+from PIL import Image, ImageTk
 import random
 
 class JuegoGusanito:
@@ -14,22 +15,24 @@ class JuegoGusanito:
         self.gusanito = [[4, 3], [4, 4], [4, 5]]
         self.direccion = "Right"
         self.color_gusanito = "green"
-        self.comida = self.generar_comida()
+        self.comida = None  # Inicialmente no hay comida
         self.puntuacion = 0
         self.nombre_gusanito = "Gusanito"
         self.puntuaciones = []
         self.juego_activo = False
         self.fondo_img = None
-        self.cargar_fondo("bk.jpg")
+        self.cargar_fondo("bk.jpg")  # Cambiar la imagen de fondo aquí
         self.root.bind("<Key>", self.cambiar_direccion)
         self.root.bind("<Return>", self.reiniciar_juego)
         self.mostrar_menu()
 
     def cargar_fondo(self, ruta):
         try:
-            self.fondo_img = tk.PhotoImage(file=ruta)
-        except tk.TclError:
-            print(f"No se pudo cargar el archivo {ruta}. Usando fondo de color predeterminado.")
+            imagen = Image.open(ruta)
+            imagen = imagen.resize((self.ancho_celda * self.largo_tablero, self.ancho_celda * self.largo_tablero), resample=Image.LANCZOS)
+            self.fondo_img = ImageTk.PhotoImage(imagen)
+        except FileNotFoundError:
+            print(f"No se pudo encontrar el archivo {ruta}. Usando fondo de color predeterminado.")
             self.fondo_img = None
 
     def mostrar_menu(self):
@@ -48,16 +51,23 @@ class JuegoGusanito:
 
     def pedir_datos_iniciales(self):
         self.nombre_gusanito = simpledialog.askstring("Nombre del Gusanito", "¿Cuál es el nombre de tu gusanito?", parent=self.root) or "Gusanito"
-        self.color_gusanito = simpledialog.askstring("Color del Gusanito", "¿Cuál es el color de tu gusanito?", parent=self.root) or "green"
+        self.color_gusanito = simpledialog.askstring("Color del Gusanito", "¿Cuál es el color de tu gusanito?", initialvalue=self.color_gusanito, parent=self.root) or "green"
         self.iniciar_juego()
 
     def iniciar_juego(self):
         self.gusanito = [[4, 3], [4, 4], [4, 5]]
         self.direccion = "Right"
-        self.comida = self.generar_comida()
+        self.generar_comida()  # Generamos la comida al iniciar el juego
         self.puntuacion = 0
         self.juego_activo = True
         self.actualizar_juego()
+
+    def generar_comida(self):
+        while True:
+            comida = [random.randint(0, self.largo_tablero - 1), random.randint(0, self.largo_tablero - 1)]
+            if comida not in self.gusanito:
+                self.comida = comida
+                break
 
     def cambiar_direccion(self, event):
         if self.juego_activo:
@@ -75,7 +85,7 @@ class JuegoGusanito:
         self.mover_gusanito()
         self.dibujar_gusanito()
         if self.detectar_colision():
-            self.mostrar_mensaje("¡Game Over! Presiona 'Enter' para jugar de nuevo o espera para volver al menú.")
+            self.mostrar_mensaje("¡Game Over! Presiona 'Enter' para jugar de nuevo \n o espera para volver al menú.")
         else:
             self.root.after(self.velocidad, self.actualizar_juego)
 
@@ -92,16 +102,10 @@ class JuegoGusanito:
 
         self.gusanito.insert(0, cabeza)
         if cabeza == self.comida:
-            self.comida = self.generar_comida()
+            self.generar_comida()  #Aqui genero la comida denuevo - comentario para no olvidar :)
             self.puntuacion += 10
         else:
             self.gusanito.pop()
-
-    def generar_comida(self):
-        while True:
-            comida = [random.randint(0, self.largo_tablero - 1), random.randint(0, self.largo_tablero - 1)]
-            if comida not in self.gusanito:
-                return comida
 
     def detectar_colision(self):
         cabeza = self.gusanito[0]
@@ -145,21 +149,22 @@ class JuegoGusanito:
             "- Come la comida roja para crecer y ganar puntos.\n"
             "- No choques contra las paredes o contra tu propio cuerpo.\n"
             "- Puedes reiniciar el juego presionando 'Enter'.\n"
-            "- En cada partida, podrás ingresar el nombre y color de tu gusanito."
+            "- En cada partida, podrás ingresar el nombre y color de tu gusanito.\n"
+            "- ¡Diviértete!"
         )
         messagebox.showinfo("Instrucciones", instrucciones)
 
-    def guardar_puntuacion(self):
-        self.puntuaciones.append((self.nombre_gusanito, self.puntuacion))
-
     def mostrar_puntuacion(self):
         if self.puntuaciones:
-            score_text = "Puntuaciones:\n"
-            for nombre, puntaje in self.puntuaciones:
-                score_text += f"{nombre}: {puntaje}\n"
-            messagebox.showinfo("Puntuaciones", score_text)
+            mensaje = "Puntuaciones:\n\n"
+            for idx, puntuacion in enumerate(self.puntuaciones, start=1):
+                mensaje += f"{idx}. {puntuacion}\n"
         else:
-            messagebox.showinfo("Puntuaciones", "No hay puntuaciones guardadas aún.")
+            mensaje = "Aún no hay puntuaciones guardadas."
+        messagebox.showinfo("Puntuaciones", mensaje)
+
+    def guardar_puntuacion(self):
+        self.puntuaciones.append(f"{self.nombre_gusanito}: {self.puntuacion}")
 
 if __name__ == "__main__":
     root = tk.Tk()
