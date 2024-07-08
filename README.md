@@ -18,4 +18,4 @@ Este proyecto es un juego clásico de gusanito implementado en Python utilizando
 
 ## Requisitos de Instalación
 
-Leer el docuemneto de requerimientos
+Leer el documento de requerimientos
